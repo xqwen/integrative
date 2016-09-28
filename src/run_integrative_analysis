@@ -1,0 +1,467 @@
+#! /usr/bin/perl
+use Cwd 'abs_path';
+
+# required input files:
+# 1. z-scores from GWAS (gzipped)
+# 2. fine-mapping results (dir) for eQTLs
+# 3. pips from eQTL
+
+
+
+# parsing input parameter file
+
+
+# command line option
+
+if($#ARGV<0 || ! -e "$ARGV[0]"){
+    print_usage();
+}
+
+
+# 0. initialization
+init();
+
+
+# 1. enrichement analysis
+printf STDERR "\nStart enrichment analysis\n";
+
+#MI_enrichment();
+
+@params = parse_MI();
+
+# 2. co-localization analysis
+printf STDERR "\n\nStart co-localization analysis\n";
+find_gwas_hits();
+summarize_eqtl_pip();
+compute_prior();
+fine_map_gwas();
+compute_rcp();
+
+
+
+sub print_usage(){
+    print stderr "Error: parameter file is not correctly specified\n";
+    exit;
+}
+
+
+sub init(){
+
+    # set key parameters empty
+    $gwas_file = $eqtl_dir = $trait ="";
+    $bin_dir = $out_dir = "./";
+    undef $mi_dir;
+    undef $eqtl_pip;
+
+    # parse parameter file
+    while(<>){
+	
+	next if /^\s*\#/;
+	next if $_ !~ /^\s*(\S+)\s+(\S+)\s*/;
+	my $key = $1;
+	my $val = $2;
+	
+	if(lc($key) eq "gwas_data"){
+	    $gwas_file = $val;
+	    next;
+	}
+
+	if(lc($key) eq "eqtl_fm_dir"){
+	    $eqtl_dir = $val;
+	    next;
+	}
+
+	if(lc($key) eq "eqtl_pip"){
+	 
+	    $eqtl_pip = $val;
+	    next;
+	}
+
+	
+	if(lc($key) eq "trait"){
+            $trait = $val;
+            next;
+        }
+
+
+	if(lc($key) eq "bin_dir"){
+            $bin_dir = $val;
+            next;
+        }
+	
+	if(lc($key) eq "out_dir"){
+	    $out_dir = $val;
+	    $out_dir = abs_path($out_dir);
+	    next;
+	}
+
+
+	if(lc($key) eq "mi_dir"){
+	    $mi_dir = $val;
+	    next;
+	}
+
+       
+
+    }
+
+    if ($trait eq ""){
+	printf STDERR "Error: trait name is not specified\n";
+	exit;
+    }
+
+    if( ! -e "$gwas_file" || $gwas_file eq ""){
+	printf stderr "Error: Invalid GWAS file\n";
+	exit;
+    }else{
+	$gwas_file = abs_path($gwas_file);
+    }
+
+    if( ! -d "$eqtl_dir" || $eqtl_dir eq ""){
+	printf stderr "Error: Invalid eQTL fine-mapping directory\n";
+	exit;
+    }else{
+	$eqtl_dir = abs_path($eqtl_dir);
+    }
+
+    
+
+    # check all necessary utilitis
+    # 1. mi_eqtl
+    if (! -x "$bin_dir/mi_eqtl"){
+	print stderr "Error: executable $bin_dir/mi_eqtl not found\n";
+	exit;
+    }
+    
+    # 2. openmp_wrapper
+    if (! -x "$bin_dir/openmp_wrapper"){
+        print stderr "Error: executable $bin_dir/openmp_wrapper not found\n";
+        exit;
+    }
+
+
+    if (! -x "$bin_dir/torus"){
+	print stderr "Error: executable $bin_dir/torus not found\n";
+        exit;
+    }
+
+
+    $bin_dir = abs_path($bin_dir);
+
+
+    if (defined($mi_dir)){
+	if( ! -d "$mi_dir"){
+	    print stderr "Error: specified MI directory not found\n";
+	    exit;
+	}
+	$mi_dir = abs_path($mi_dir);
+    }
+    
+    if(defined($eqtl_pip)){
+	if (! -e "$eqtl_pip"){
+	    print stderr "Error: specified eQTL PIP file not found\n";
+	    exit;
+	}
+	$eqtl_pip = abs_path($eqtl_pip);
+    }
+    
+    if( ! -d "$out_dir"){
+	$out_dir = abs_path($out_dir);
+	`mkdir $out_dir`;
+    }
+
+    
+}
+
+
+
+
+
+
+sub MI_enrichment{
+    
+    if(!defined($mi_dir)){
+	print STDERR "Impute eQTL data ...\n";
+	open OUT, ">$out_dir/batch_prep_mi.cmd";
+	for $i (1..25){
+	    print OUT "$bin_dir/mi_eqtl $eqtl_dir $gwas_file | gzip - > $out_dir/mi/$trait.annot.sim$i.gz\n";
+	}
+	close OUT;
+	`mkdir $out_dir/mi` if (! -d "$out_dir/mi");
+	`$bin_dir/openmp_wrapper -d $out_dir/batch_prep_mi.cmd -t 8`;
+	
+	$mi_dir = "$out_dir/mi/";
+	
+    }
+
+
+    print STDERR "Perform enrichment analysis by multiple imputation ... \n";
+    open OUT, ">$out_dir/batch_mi.cmd";
+    
+    @mi_files = <$mi_dir/*.gz>;
+    
+    
+    `mkdir $out_dir/mi_est` if ! -d "$out_dir/mi_est";
+    foreach $f  (@mi_files){
+	$f =~ /sim(\d+)/;
+	print OUT "$bin_dir/torus -d $gwas_file -annot $f -est --load_zval --single_fuzzy_annot > $out_dir/mi_est/$trait.mi.$1.est\n";
+    }
+ 
+    `$bin_dir/openmp_wrapper -d $out_dir/batch_mi.cmd -t 8`;
+
+}
+
+
+
+    
+
+
+sub find_gwas_hits {
+    
+    # find gwas qtls
+    print STDERR "Find GWAS QTLs ...\n";
+    open FILE, "$bin_dir/torus -d $gwas_file --load_zval -qtl |";
+    while(<FILE>){
+	
+	next if $_ !~ /\d/;
+	my @data = split /\s+/,$_;
+	shift @data until $data[0]=~/^\S/;
+	if($data[-1] == 1){
+	    push @qtl_list, $data[1];
+	}
+	
+    }
+    @qtl{@qtl_list} = @qtl_list;
+
+    # get eqtl pip
+}
+
+
+sub summarize_eqtl_pip {
+
+    print STDERR "Summarize eQTL PIPs ..\n";
+    if(!defined($eqtl_pip)){
+
+	`$bin_dir/get_pip $eqtl_dir > $out_dir/eqtl.pip`;
+	$eqtl_pip = "$out_dir/eqtl.pip";
+    }
+    
+    $mu = $params[0];
+    $alpha = $params[1];
+
+    $prob0 = exp($mu)/(1+exp($mu));
+    $prob1 = exp($mu+$alpha)/(1+exp($mu+$alpha));
+
+    open FILE, "$eqtl_pip";
+    while(<FILE>){
+
+	next if $_ !~ /\d/;
+	my @data = split /\s+/, $_;
+	shift @data until $data[0]=~/^\S/;
+		
+	$prior = $data[1]*$prob1 + (1-$data[1])*$prob0;
+
+	my $id = "$data[2]:$data[0]";
+
+	$rcd{$id} = $prior;
+        $epip{$id} = $data[1];
+        if(!defined($snp2gene{$data[0]})){
+            $snp2gene{$data[0]}=[];
+        }
+        push @{$snp2gene{$data[0]}}, $data[2];
+
+    }
+}
+
+
+
+sub compute_prior {
+    
+    # prepare the Loci to be fine-mapped
+    print STDERR "Prepare for co-localizaiton analysis ...\n";
+    `mkdir $out_dir/gwas_signals` if ! -d "$out_dir/gwas_signals";
+    $curr = "";
+    open FILE, "zcat $gwas_file |";
+    while(<FILE>){
+	chomp;
+	next if $_ !~ /^\s*(\S+)\s+(\S+)\s+/;
+	next if(!defined($qtl{$2}));
+	if($curr ne $2){
+	    open OUT1, ">$out_dir/gwas_signals/$2.snp";
+	    open OUT2, ">$out_dir/gwas_signals/$2.zval";
+	    $curr = $2;
+	}
+	print OUT1 "$1\n";
+	print OUT2 "$_\n";
+    }
+
+    close OUT1;
+    close OUT2;
+    
+ 
+
+    # prepare prior
+    `mkdir $out_dir/priors` if ! -d "$out_dir/priors";
+    `mkdir $out_dir/eqtl_pip` if ! -d "$out_dir/eqtl_pip";
+    print STDERR "Compute priors ...\n";
+    @files = <$out_dir/gwas_signals/*.snp>;
+    foreach $f (@files){
+	
+	$f=~/(Loc\d+)/;
+	$loc = $1;
+	
+	open DATA, "$f";
+	my @snps = <DATA>;
+	chomp @snps;
+	
+	my %hash;
+	my $ss;
+	foreach $ss (@snps){
+            my @genes = @{$snp2gene{$ss}};
+	    my $g;
+	    next if $#genes == -1;
+	    foreach $g (@genes){
+		$hash{$g} = 1;
+		
+	    }
+        }
+	
+	my $g;
+	foreach $g (keys %hash){
+
+	    open OUT1, ">$out_dir/priors/$g\_$loc.prior";
+	    open OUT2, ">$out_dir/eqtl_pip/$g\_$loc.eqtl.pip";
+	    my $s;
+	    foreach $s (@snps){
+                my $mp = $prob0;
+                if(defined($rcd{"$g:$s"})){
+                    $mp = $rcd{"$g:$s"};
+                }
+                printf OUT1 "$s\t%9.4e\n",$mp;
+                printf OUT2 "$s\t%9.4e\n", $epip{"$g:$s"};
+            }
+	   
+	    close OUT1;
+	    close OUT2;
+	}
+
+	
+    }
+    
+}
+
+
+
+
+
+sub fine_map_gwas {
+    
+    print STDERR "Perform fine-mapping of GWAS ...\n";
+    
+    
+    `mkdir $out_dir/gwas_pip` if ! -d "$out_dir/gwas_pip";
+    open OUT, ">$out_dir/batch_dap.cmd";
+    @files = <$out_dir/priors/*.prior>;
+    foreach $f (@files){
+	$f =~/(Loc\d+)/;
+	my $loc = $1;
+	$f =~/(ENSG\d+\_Loc\d+)/;
+	my $pair = $1;
+	print OUT "$bin_dir/dap_ss -d $out_dir/gwas_signals/$loc.zval -p $f > $out_dir/gwas_pip/$pair.gwas.pip\n";
+    }
+
+    `$bin_dir/openmp_wrapper -d $out_dir/batch_dap.cmd -t 8`;
+
+}
+
+
+
+sub compute_rcp {
+    
+    print STDERR "Compute regional col-localization probabilities ...\n";
+    open OUT, ">$out_dir/batch_rcp.cmd";
+    `mkdir $out_dir/rcp_out` if ! -d "$out_dir/rcp_out";
+    @files = <$out_dir/gwas_pip/*.gwas.pip>;
+    foreach $f (@files){
+	$f=~/(ENSG\d+\_Loc\d+)/;
+        print OUT "$bin_dir/compute_rcp -a0 $params[0] -a1 $params[1] -loc $1 -gwas_dir $out_dir/gwas_pip -eqtl_dir $out_dir/eqtl_pip >$out_dir/rcp_out/$1.rcp  2>$out_dir/rcp_out/$1.coloc.detail\n";
+    }
+    close OUT;
+    `openmp_wrapper -d $out_dir/batch_rcp.cmd -t 8`;
+    `cat $out_dir/rcp_out/*.rcp | sort -nrk4  > $out_dir/$trait.coloc.rst`;
+    
+}
+
+
+
+
+
+
+
+sub parse_MI {
+    
+    open OUT, ">$out_dir/$trait.enrich.est";
+
+    open FILE, "grep Intercept $out_dir/mi_est/*.est |";
+    $sum = 0;
+    $count = 0;
+    $var = 0;
+    while(<FILE>){
+	chomp;
+	my @data = split /\s+/, $_;
+	shift @data until $data[0]=~/^\S/;
+	$sum+= $data[2];
+	push @pti, $data[2];
+	my $sd = abs($data[3]-$data[2])/1.96;
+	push @sei, $sd;
+	$var += $sd*$sd;
+	$count++;
+    }
+
+    my $a0 = $mean = $sum/$count;
+    $sdm = 0;
+    foreach $v (@pti){
+	$sdm += ($v - $mean)*($v-$mean);
+    }
+
+    $bm = $sdm/($count-1);
+    $um = $var/$count;
+
+    $smi = sqrt($um + $bm*($count+1)/$count);
+
+    printf OUT "%9.3f  %9.3f  %9.3f\n", $mean, $mean-1.96*$smi, $mean+1.96*$smi;
+    
+
+    open FILE, "grep annot $out_dir/mi_est/*.est |";
+    $sum = 0;
+    $count = 0;
+    $var = 0;
+    while(<FILE>){
+	chomp;
+	my @data = split /\s+/, $_;
+	shift @data until $data[0]=~/^\S/;
+	$sum+= $data[2];
+	push @pt, $data[2];
+	my $sd = abs($data[3]-$data[2])/1.96;
+	push @se, $sd;
+	$var += $sd*$sd;
+	$count++;
+    }
+
+    my $a1 = $mean = $sum/$count;
+    $sdm = 0;
+    foreach $v (@pt){
+	$sdm += ($v - $mean)*($v-$mean);
+    }
+
+    $bm = $sdm/($count-1);
+    $um = $var/$count;
+
+    $smi = sqrt($um + $bm*($count+1)/$count);
+
+    printf OUT "%9.3f  %9.3f  %9.3f\n", $mean, $mean-1.96*$smi, $mean+1.96*$smi;
+    
+
+    return ($a0,$a1);
+    
+}
