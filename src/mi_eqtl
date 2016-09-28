@@ -1,0 +1,73 @@
+#! /usr/bin/perl
+
+@files = <$ARGV[0]/*>;
+
+foreach $f (@files){
+    sample_gene($f);
+}
+
+foreach $s (@list){
+    $s =~/^(\d+)\_(\d+)/;
+    #$s =~/^chr(\d+)\.(\d+)/;
+    push @slist, "chr$1:$2";
+}
+
+@rcd{@slist} = @slist;
+
+
+open FILE, "zcat $ARGV[1] | ";
+
+print "SNP  annot_d\n";
+while(<FILE>){
+    next if $_ !~ /\d/;
+    my @data = split /\s+/,$_;
+    shift @data until $data[0]=~/^\S/;
+    if(!defined($rcd{$data[0]})){
+	$rcd{$data[0]} = 0;
+    }else{
+	$rcd{$data[0]} = 1;
+    }
+
+    print "$data[0] $rcd{$data[0]}\n";
+}
+
+
+
+sub sample_gene{
+
+    my ($f) = @_;
+    my $sum = 0;
+    my $count = 0;
+    my %rcd;
+
+    open FILE, "$f";
+    while(<FILE>){
+	chomp;
+	next if $_ !~ /^\s*\S+\s+(\S+)\s+.*\[/;
+	$sum += $1;
+	$rcd{$count} = { cum => $sum,
+			 config => $_,
+			 prob => $1 }; 
+	$count++;
+    }
+
+    $count--;
+    my $r = rand();
+
+    for $i (0..$count){
+	if($r <= $rcd{$i}->{cum}/$sum){
+	    my @snps = $rcd{$i}->{config}=~/\[(\S+)\]/g;
+	    foreach $s (@snps){
+		return if $s eq "NULL";
+		if(!defined($sampled{$s})){
+		    push @list, $s;
+		    $sampled{$s} = 1;
+		}
+	    }
+	    return;
+	}
+    }
+}
+
+
+
