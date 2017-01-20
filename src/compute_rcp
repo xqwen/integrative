@@ -1,0 +1,76 @@
+#! /usr/bin/perl
+
+for $i (0..$#ARGV){
+    if($ARGV[$i] eq "-a0"){
+	$a0 = $ARGV[++$i];
+	next;
+    }
+    if($ARGV[$i] eq "-a1"){
+	$a1 = $ARGV[++$i];
+	next;
+    }
+
+    if($ARGV[$i] eq "-eqtl_dir"){
+	$eqtl_dir = $ARGV[++$i];
+	next;
+    }
+
+    if($ARGV[$i] eq "-gwas_dir"){
+	$gwas_dir = $ARGV[++$i];
+	next;
+    }
+    
+    if($ARGV[$i] eq "-loc"){
+	$loc = $ARGV[++$i];
+	next;
+    }
+}
+
+$ratio = (1+exp($a0+$a1))/(exp($a1)+exp($a0+$a1));
+
+open FILE, "$gwas_dir/$loc.gwas.pip";
+while(<FILE>){
+    
+    next if $_ !~ /\d/;
+    my @data = split /\s+/, $_;
+    shift @data until $data[0]=~/^\S/;
+    
+    $gpip{$data[0]} = $data[1];
+    $cum_gpip += $data[1];
+}
+
+
+
+open FILE, "$eqtl_dir/$loc.eqtl.pip";
+
+$max = -1;
+$max_snp ="";
+while(<FILE>){
+    
+    next if $_ !~ /\d/;
+    
+    my @data = split /\s+/, $_;
+    shift @data until $data[0]=~/^\S/;
+    my $epip = $data[1];
+    my $snp = $data[0];
+    if($epip == 0){
+	$coloc_prob  = 0;
+    }else{
+	$mratio = $ratio*(1-$epip)/$epip;
+	$coloc_prob = $gpip{$snp}/(1+$mratio);
+    }
+    
+    if($coloc_prob > $max){
+	$max = $coloc_prob;
+	$max_snp = $snp;
+    }
+    printf STDERR "$loc\t$g\t$snp\t%9.4e\n", $coloc_prob;
+	
+    $cum_coloc_prob += $coloc_prob;
+	
+}
+
+$loc =~ /(ENSG\d+)\_(Loc\d+)/;
+
+printf "%10s   %15s  %9.3f  %9.3f    %20s   %9.3f\n",$2, $1, $cum_gpip,  $cum_coloc_prob,$max_snp, $max;
+
