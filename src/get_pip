@@ -1,0 +1,46 @@
+#! /usr/bin/perl
+
+@files = <$ARGV[0]/*>;
+foreach $f (@files){
+    get_pip($f);
+}
+
+foreach $k (keys %pip){
+    $k =~/^(\d+)\_(\d+)/;
+    my $id = "chr$1:$2";
+    foreach $e (@{$pip{$k}}){
+	$e =~/(\S+)\:(\S+)/;
+	printf "%20s  %9.4e  %15s\n", $id, $2, $1;
+    }
+}
+
+
+sub get_pip{
+    my ($f) = @_;
+    my $sum = 0;
+    my $count = 0;
+    my %rcd;
+
+    open FILE, "$f";
+    $f =~/(ENSG\d+)/;
+    $gene = $1;
+    while(<FILE>){
+	chomp;
+	next if /NULL/;
+	next if $_ !~ /^\s*\d+\s+(\S+)\s+\d+\s+\S+\s+(\[.*\])\s*$/;
+	my $model = $2;
+	my $prob = $1;
+	my @snps = ($model=~/\[(\S+)\]/g);
+	foreach $s (@snps){
+	    $rcd{$s} += $prob;
+	}
+    }
+
+    foreach $s (keys %rcd){
+	if(!defined($pip{$s})){
+	    $pip{$s} = [];
+	}
+	push @{$pip{$s}}, "$gene:$rcd{$s}"; 	    
+    }
+
+}
