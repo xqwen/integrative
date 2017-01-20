@@ -1,0 +1,8 @@
+bin_dir       ../scripts/
+out_dir	      HDL_blood
+trait         HDL
+gwas_data     gwas_data/HDL.zval.gz 
+
+eqtl_fm_dir   eqtl_data/blood/fm_rst/
+mi_dir	      eqtl_summary/blood_mi/
+eqtl_pip      eqtl_summary/gtex.blood.eqtl.pip
