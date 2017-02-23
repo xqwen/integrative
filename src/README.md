@@ -12,13 +12,26 @@ The single execution point to carry out the full integrative analysis is the per
 * ```get_pip```: perl script to collect QTL posterior inclusion probabilities (PIPs) from QTL analysis results
 * ```compute_rcp```: perl script to compute regional colocalization probabilities (RCPs)
 
-None of the above needs to be explicitly invoked by users, but they (or their symbolic links) should be placed in a single directory that enloc can access.
+None of the above needs to be explicitly invoked by users, but they (or their symbolic links) should be placed in a *single* directory that enloc can access.
 
 
 
 
 
 ## Data preparation for enloc analysis
+
+### GWAS Data
+
+### Molecular eQTL Data
+
+
+## Parameter file for enloc
+
+
+## Running enloc
+
+
+## Getting results
 
 
 
