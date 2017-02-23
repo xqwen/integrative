@@ -1,12 +1,6 @@
 #! /usr/bin/perl
 use Cwd 'abs_path';
 
-# required input files:
-# 1. z-scores from GWAS (gzipped)
-# 2. fine-mapping results (dir) for eQTLs
-# 3. pips from eQTL
-
-
 
 # parsing input parameter file
 
