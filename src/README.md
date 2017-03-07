@@ -15,7 +15,7 @@ The single execution point to carry out the full integrative analysis is the per
 None of the above needs to be explicitly invoked by users, but they (or their symbolic links) should be placed in a *single* directory that enloc can access.
 
 
-## Data preparation for enloc analysis
+## Data preparation for ```enloc``` analysis
 
 
 ### Molecular QTL Data
@@ -23,8 +23,8 @@ None of the above needs to be explicitly invoked by users, but they (or their sy
 ```enloc``` requires summary information from the molecular QTL analysis to impute binary annotations (i.e. the latent true association status of each SNP with respect to the molecular phenotype) in enrichment analysis. These summary information details all possible association models (i.e., combination of associated SNPs) and their assessed probabilities for each molecular trait.  This information can be obtained from Bayesian multi-SNP QTL analysis implemented in the software package ```dap```.
 
 A sample set of eQTL annotation data from the cis-eQTL analysis of GTEx whole blood samples (version 6 release) can be downloaded [here](http://www-personal.umich.edu/~xwen/download/gtex_whole_blood.v6.tgz).
-The data set contains fine-mapping result of cis-eQTLs from 22,749 genes.
-We also provide a wiki page on the complete flow of Bayesian molecular QTL analysis..
+The data set contains fine-mapping result of cis-eQTLs from 22,749 genes analyzed by the greedy version of the DAP algorithm.
+We also provide a wiki page on the complete flow of Bayesian molecular QTL analysis.
 
 
 ### GWAS Data
