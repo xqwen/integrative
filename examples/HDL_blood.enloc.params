@@ -1,8 +1,23 @@
-bin_dir       ../scripts/
-out_dir	      HDL_blood
-trait         HDL
-gwas_data     gwas_data/HDL.zval.gz 
+## executable options
+bin_dir       scripts/
 
-eqtl_fm_dir   eqtl_data/blood/fm_rst/
-mi_dir	      eqtl_summary/blood_mi/
-eqtl_pip      eqtl_summary/gtex.blood.eqtl.pip
+## input data directories
+gwas_data     data/HDL.z_score.gz 
+qtl_fm_dir   data/gtex_blood_eqtl/
+
+
+## output and working directory
+out_dir	      HDL_blood
+
+
+## Analysis characterization
+trait         HDL
+
+
+## Optional parameters
+
+# bypass_enrichment_analysis 1  
+# use_openmp    1
+
+
+

@@ -21,9 +21,7 @@ None of the above needs to be explicitly invoked by users, but they (or their sy
 This implementation of analysis pipeline is designed and tested in a multi-core single machine environment. The typical Unix/Linux utilities are also assumed to be available. 
 
 
-
-
-## Data preparation for ```enloc``` analysis
+## Data preparation for enloc analysis
 
 
 ### Molecular QTL Data
@@ -54,8 +52,28 @@ The first and second columns represent the ID the LD block of the corresponding 
 For reference, we provide a complete sample data from the GWAS of high density cholesterol (HDL): [HDL.z_score.gz](http://www-personal.umich.edu/~xwen/download/gwas_hdl/HDL.z_score.gz). The data set is orignially from [Teslovich (2010)](https://www.ncbi.nlm.nih.gov/pubmed/20686565) with additional 1000Genome SNPs imputed by [Pickrell (2014)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3980523/).
 
 
-
 ## Parameter file for enloc
+
+Parameters required by the integrative analysis are supplied through a single text file. An example of the parameter file is provided [here](../examples/HDL_blood.enloc.params). The informative line of the parameter file has the following format
+```
+KEYWORD   VALUE
+```
+The keywords are case-insensitive. Comments line are allowed in the parameter file by annotating a ```#``` at the beginning of the comment.
+
+### Required parameters
+
+* **BIN_DIR**:  ```enloc``` expects all the executable utilities, namely ```mi_eqtl```, ```get_pip```, ```compute_rcp```, ```dap1```, ```openmp_wrapper``` and ```torus``` can be accessed from a single directory, and BIN_DIR specifies the location of this directory containing all the utilities. Users can make symbolic links to  BIN_DIR instead of copying the executables. Relative path is allowed.
+
+* **GWAS_DATA**: location of the gzipped GWAS z-score file. Relative path is allowed.
+* **QTL_FM_DIR**: location of the directory containing fine-mapping results of molecular QTL analysis. Relative path is allowed.
+* **OUT_DIR**: output (and working) directory name. enloc will create the directory if it does not already exist. Relative path is allowed.
+* **TRAIT_NAME**: the name of the GWAS trait
+
+
+
+
+
+
 
 
 ## Running enloc

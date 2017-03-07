@@ -79,12 +79,12 @@ sub init(){
 	    next;
 	}
 
-	if(lc($key) eq "eqtl_fm_dir"){
+	if(lc($key) eq "qtl_fm_dir"){
 	    $eqtl_dir = $val;
 	    next;
 	}
 
-	if(lc($key) eq "eqtl_pip"){	 
+	if(lc($key) eq "qtl_pip"){	 
 	    $eqtl_pip = $val;
 	    next;
 	}
