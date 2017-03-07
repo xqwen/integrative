@@ -6,13 +6,7 @@ foreach $f (@files){
     sample_gene($f);
 }
 
-foreach $s (@list){
-    $s =~/^(\d+)\_(\d+)/;
-    #$s =~/^chr(\d+)\.(\d+)/;
-    push @slist, "chr$1:$2";
-}
-
-@rcd{@slist} = @slist;
+@rcd{@list} = @list;
 
 
 open FILE, "zcat $ARGV[1] | ";

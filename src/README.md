@@ -1,8 +1,10 @@
-l# Instructions for enloc
+# Instructions for enloc
 
 ```enloc``` implements the analysis pipeline for enrichment estimation aided colocalization analysis.
 
 ## Prerequisite and installation
+
+### Installation
 
 The single execution point to carry out the full integrative analysis is the perl script ```enloc```, which assumes a few scripts and binary executables pre-installed in the running machine.
 
@@ -13,6 +15,12 @@ The single execution point to carry out the full integrative analysis is the per
 * ```compute_rcp```: perl script to compute regional colocalization probabilities (RCPs)
 
 None of the above needs to be explicitly invoked by users, but they (or their symbolic links) should be placed in a *single* directory that enloc can access.
+
+### Ideal running environment
+
+This implementation of analysis pipeline is designed and tested in a multi-core single machine environment. The typical Unix/Linux utilities are also assumed to be available. 
+
+
 
 
 ## Data preparation for ```enloc``` analysis

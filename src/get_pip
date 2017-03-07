@@ -6,8 +6,8 @@ foreach $f (@files){
 }
 
 foreach $k (keys %pip){
-    $k =~/^(\d+)\_(\d+)/;
-    my $id = "chr$1:$2";
+
+    my $id = $k;
     foreach $e (@{$pip{$k}}){
 	$e =~/(\S+)\:(\S+)/;
 	printf "%20s  %9.4e  %15s\n", $id, $2, $1;
