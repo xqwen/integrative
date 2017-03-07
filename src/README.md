@@ -71,15 +71,41 @@ The keywords are case-insensitive. Comments line are allowed in the parameter fi
 
 
 
-
-
-
-
-
 ## Running enloc
 
+Perform the integrative analysis by issuing the following command 
+``` enloc parameter_file```
+in the command line.
 
-## Getting results
 
+## Results
+
+Upon finishing the analysis, enloc will output the final results (along with intermediate result/script files) into OUT_DIR direcotry. The two most important result files summarize the results from enrichment and colocalization analyses.
+
+### Enrichment analysis summary
+
+This file is named ```TRAIT_NAME.enrich.est```. It summarizes the enrichment estimation from multiple imputations. An example output is given below
+```
+ -10.380    -10.435    -10.324
+  4.759      3.098      6.421
+```
+The first line indicate the estimate of the intercept term (first column) and its 95\% confidence interval (second and third column). The second line represents the enrichment estimate in log-odds ratio (first column) and its corresponding 95\% confidence interval (second and third column).
+
+### Colocalization result
+
+The results of colocalization analysis are summarized in the file ```TRAIT_NAME.enloc.rst```. The columns of this file are
+```
+gwas_locus   molecular_qtl_trait    locus_gwas_pip    locus_rcp   lead_coloc_SNP  lead_snp_scp
+```
+Specifically,  ```gwas_locus``` indicates the locus name in GWAS analysis. The entry  ```molecular_qtl_trait``` represents the specific molecular trait examined. In the case of eQTL analysis, this entry would indicate the gene name.  The entry  ```locus_gwas_pip``` represents the cumulative posterior inclusion probability (PIP) of the locus containing a causal GWAS hit. The entry ```locus_rcp``` represents the regional colocalization probability of the overlapping regions (between GWAS and molecular QTL) containing a co-localized signal. The entry ```lead_coloc_SNP``` provides the lead SNP with highest SNP-level colocalization probability whose exact value is shown in the entry ```lead_snp_scp```.
+
+An example output is shown below
+```
+ Loc1615   ENSG00000170866      1.000      0.988          chr19:54797848       0.974
+ Loc1129   ENSG00000134825      1.000      0.897          chr11:61557803       0.885
+ Loc949    ENSG00000155158      1.000      0.867           chr9:15304782       0.693
+ Loc1615   ENSG00000170889      1.000      0.851          chr19:54800500       0.487
+```
+The entries are sorted according to the descending order of thier locus_rcp values.
 
 
