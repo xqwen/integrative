@@ -265,11 +265,11 @@ sub find_gwas_hits {
 
 sub summarize_eqtl_pip {
 
-    print STDERR "Summarize eQTL PIPs ..\n";
+    print STDERR "Summarize QTL PIPs ..\n";
     if(!defined($eqtl_pip)){
 
-	`$bin_dir/get_pip $eqtl_dir > $out_dir/eqtl.pip`;
-	$eqtl_pip = "$out_dir/eqtl.pip";
+	`$bin_dir/get_pip $eqtl_dir > $out_dir/qtl.pip`;
+	$eqtl_pip = "$out_dir/qtl.pip";
     }
     
     $mu = $params[0];
@@ -328,14 +328,14 @@ sub compute_prior {
 
     # prepare prior
     `mkdir $out_dir/priors` if ! -d "$out_dir/priors";
-    `mkdir $out_dir/eqtl_pip` if ! -d "$out_dir/eqtl_pip";
+    `mkdir $out_dir/qtl_pip` if ! -d "$out_dir/qtl_pip";
     print STDERR "Compute priors ...\n";
     @files = <$out_dir/gwas_signals/*.snp>;
     foreach $f (@files){
 	
-	$f=~/(Loc\d+)/;
+	$f=~/(\w+)\.snp/;
 	$loc = $1;
-	
+
 	open DATA, "$f";
 	my @snps = <DATA>;
 	chomp @snps;
@@ -356,7 +356,7 @@ sub compute_prior {
 	foreach $g (keys %hash){
 
 	    open OUT1, ">$out_dir/priors/$g\_$loc.prior";
-	    open OUT2, ">$out_dir/eqtl_pip/$g\_$loc.eqtl.pip";
+	    open OUT2, ">$out_dir/qtl_pip/$g\_$loc.qtl.pip";
 	    my $s;
 	    foreach $s (@snps){
                 my $mp = $prob0;
@@ -389,9 +389,9 @@ sub fine_map_gwas {
     open OUT, ">$out_dir/batch_dap.cmd";
     @files = <$out_dir/priors/*.prior>;
     foreach $f (@files){
-	$f =~/(Loc\d+)/;
+	$f =~/\_(\w+)\.prior/;
 	my $loc = $1;
-	$f =~/(ENSG\d+\_Loc\d+)/;
+	$f =~/(\w+\_\w+)\.prior/;
 	my $pair = $1;
 	print OUT "$bin_dir/dap1 -d $out_dir/gwas_signals/$loc.zval -p $f > $out_dir/gwas_pip/$pair.gwas.pip\n";
     }
@@ -402,6 +402,7 @@ sub fine_map_gwas {
     }else{
 	`sh $ou_dir/batch_dap.cmd`;
     }
+
 }
 
 
@@ -413,8 +414,8 @@ sub compute_rcp {
     `mkdir $out_dir/rcp_out` if ! -d "$out_dir/rcp_out";
     @files = <$out_dir/gwas_pip/*.gwas.pip>;
     foreach $f (@files){
-	$f=~/(ENSG\d+\_Loc\d+)/;
-        print OUT "$bin_dir/compute_rcp -a0 $params[0] -a1 $params[1] -loc $1 -gwas_dir $out_dir/gwas_pip -eqtl_dir $out_dir/eqtl_pip >$out_dir/rcp_out/$1.rcp  2>$out_dir/rcp_out/$1.enloc.detail\n";
+	$f=~/(\w+)\.gwas.pip/;
+        print OUT "$bin_dir/compute_rcp -a0 $params[0] -a1 $params[1] -loc $1 -gwas_dir $out_dir/gwas_pip -eqtl_dir $out_dir/qtl_pip >$out_dir/rcp_out/$1.rcp  2>$out_dir/rcp_out/$1.enloc.detail\n";
     }
     close OUT;
     

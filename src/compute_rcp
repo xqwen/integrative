@@ -32,7 +32,7 @@ open FILE, "$gwas_dir/$loc.gwas.pip";
 while(<FILE>){
     
     next if $_ !~ /\d/;
-    my @data = split /\s+/, $_;
+    my @data = split /\s+/,$_;
     shift @data until $data[0]=~/^\S/;
     
     $gpip{$data[0]} = $data[1];
@@ -41,7 +41,7 @@ while(<FILE>){
 
 
 
-open FILE, "$eqtl_dir/$loc.eqtl.pip";
+open FILE, "$eqtl_dir/$loc.qtl.pip";
 
 $max = -1;
 $max_snp ="";
@@ -53,6 +53,7 @@ while(<FILE>){
     shift @data until $data[0]=~/^\S/;
     my $epip = $data[1];
     my $snp = $data[0];
+   
     if($epip == 0){
 	$coloc_prob  = 0;
     }else{
@@ -70,7 +71,7 @@ while(<FILE>){
 	
 }
 
-$loc =~ /(ENSG\d+)\_(Loc\d+)/;
+$loc =~ /(\w+)\_(\w+)/;
 
 printf "%10s   %15s  %9.3f  %9.3f    %20s   %9.3f\n",$2, $1, $cum_gpip,  $cum_coloc_prob,$max_snp, $max;
 

@@ -22,8 +22,11 @@ sub get_pip{
     my %rcd;
 
     open FILE, "$f";
-    $f =~/(ENSG\d+)/;
+    
+    my @data = split /\//, $f;
+    $data[-1]=~/^(\w+)/;
     $gene = $1;
+
     while(<FILE>){
 	chomp;
 	next if /NULL/;

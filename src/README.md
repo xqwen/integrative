@@ -32,6 +32,7 @@ A sample set of eQTL annotation data from the cis-eQTL analysis of GTEx whole bl
 The data set contains fine-mapping result of cis-eQTLs from 22,749 genes analyzed by the greedy version of the DAP algorithm.
 We also provide a wiki page on the complete flow of Bayesian molecular QTL analysis.
 
+**IMPORTANT**: The name of each molecular QTL analysis result file should start with an identifier of the corresponding molecular trait. This information will be used by ```enloc```. E.g. for eQTL analysis, the result should be named as "gene_name.suffix". ***In particular, the identifier should only include alphanumerics (i.e., the set of letters of the alphabet and numeric characters)***..
 
 ### GWAS Data
 
@@ -108,4 +109,4 @@ An example output is shown below
 ```
 The entries are sorted according to the descending order of thier locus_rcp values.
 
-
+Besides the summary information, the detailed SNP-level information on colocalization analysis is saved in the directory OUT_DIR/rcp_out.
