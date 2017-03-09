@@ -9,6 +9,7 @@
 The single execution point to carry out the full integrative analysis is the perl script ```enloc```, which assumes a few scripts and binary executables pre-installed in the running machine.
 
 * ```torus```: binary executable to carry out the EM algorithm for enrichment estimation. ([repo](https://github.com/xqwen/dap/tree/master/torus_src))
+* ```dap1```: binary executable to perform fine-mapping analysis using DAP-1 algorithm ([repo](https://github.com/xqwen/dap/tree/master/dap1_src))
 *  ```openmp_wrapper```: binary executable to carry out multi-thread batch processing ([repo](https://github.com/xqwen/openmp_wrapper))
 * ```mi_eqtl```: perl script to sample multiple imputation QTL data sets (available in this directory)
 * ```get_pip```: perl script to collect QTL posterior inclusion probabilities (PIPs) from QTL analysis results
