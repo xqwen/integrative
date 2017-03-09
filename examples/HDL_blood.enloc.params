@@ -1,8 +1,8 @@
 ## executable options
-bin_dir       scripts/
+bin_dir       bin/
 
 ## input data directories
-gwas_data     data/HDL.z_score.gz 
+gwas_data    data/HDL.z_score.gz 
 qtl_fm_dir   data/gtex_blood_eqtl/
 
 
