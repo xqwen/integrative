@@ -16,7 +16,7 @@ Software distributed under the terms of the GNU General Public License as publis
 ## Repository structure
 
 * ``src``: the directory contains scripts for the software pipeline and relevant instructions
-* ``examples``: sample data for testing and debugging
+* ``examples``: sample data and a step-by-step guide for reproducing the analysis described in the manuscript
 
 ## Dependency 
 
@@ -27,3 +27,7 @@ The softwar pipeline assumes the availability of the following executables
 *  [dap](https://github.com/xqwen/dap/)
 *  [openmp_wrapper](https://github.com/xqwen/openmp_wrapper)
 
+
+## Citation
+
+* Wen, X., Pique-Regi, R., Luca, F. Integrating Molecular QTL Data into Genome-wide Genetic Association Analysis: Probabilistic Assessment of Enrichment and Colocalization. PLOS Genetics. (In press). 
