@@ -25,7 +25,7 @@ Dowload the following data sets using, e.g., wget.
 4. create an empty subdirectory ```workspace/data/gtex_blood_eqtl```
 5. unpack the eQTL result files
         ```
-         cd data
+         cd data;
          tar zxf gtex_whole_blood.v6.tgz -C gtex_blood_eqtl
         ```
 6. create a direcotry ```workspace/bin```
