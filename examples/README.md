@@ -43,5 +43,5 @@ set the current working directory as  ```workspace``` and issue the following co
 
 # Step 5: Getting results
 
-Due to the stochastic nature of the multiple imputation scheme, small variation among repeated analysis of the same data is expected. Here we provide the two main result files ```HDL_blood.enrich.est``` and ```HDL_blood.coloc.rst``` for reference purpose.
+Due to the stochastic nature of the multiple imputation scheme, small variation among repeated analysis of the same data is expected. Here we provide the two main result files ```HDL_blood.enrich.est``` and ```HDL_blood.coloc.rst``` for reference purpose. The detailed format of these files is explained [here](../src/).
 
