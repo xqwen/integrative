@@ -18,6 +18,10 @@ Software distributed under the terms of the GNU General Public License as publis
 * ``src``: the directory contains scripts for the software pipeline and relevant instructions
 * ``examples``: sample data and a step-by-step guide for reproducing the analysis described in the manuscript
 
+
+
+
+
 ## Dependency 
 
 The softwar pipeline assumes the availability of the following executables
@@ -26,6 +30,12 @@ The softwar pipeline assumes the availability of the following executables
 *  [torus](https://github.com/xqwen/dap/tree/master/torus_src)
 *  [dap](https://github.com/xqwen/dap/)
 *  [openmp_wrapper](https://github.com/xqwen/openmp_wrapper)
+
+
+## Molecular QTL data analysis
+
+Enloc also requires specific (Bayesian) analysis of molecular QTL data, which can be achieved by the ```dap``` and ```torus```. A detailed [step-by-step guideline](https://xqwen.github.io/qtl_pipeline/) with real data is provided.  
+
 
 
 ## Citation
