@@ -40,4 +40,4 @@ Enloc also requires specific (Bayesian) analysis of molecular QTL data, which ca
 
 ## Citation
 
-* Wen, X., Pique-Regi, R., Luca, F. Integrating Molecular QTL Data into Genome-wide Genetic Association Analysis: Probabilistic Assessment of Enrichment and Colocalization. PLOS Genetics. (In press). 
+* Wen, X., Pique-Regi, R., Luca, F. Integrating Molecular QTL Data into Genome-wide Genetic Association Analysis: Probabilistic Assessment of Enrichment and Colocalization. *PLOS Genetics*. 2017 Mar 13(3): e1006646. 
