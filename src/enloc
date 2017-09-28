@@ -210,7 +210,7 @@ sub MI_enrichment{
 	if($use_openmp){
 	    `$bin_dir/openmp_wrapper -d $out_dir/batch_prep_mi.cmd -t 8`;
 	}else{
-	    `sh $out_dir/batch_prep_mi.cmd`;
+	    `/bin/sh $out_dir/batch_prep_mi.cmd`;
 	}
 	
 	$mi_dir = "$out_dir/mi/";
@@ -233,7 +233,7 @@ sub MI_enrichment{
     if($use_openmp){
 	`$bin_dir/openmp_wrapper -d $out_dir/batch_mi.cmd -t 8`;
     }else{
-	`sh $out_dir/batch_mi.cmd`;
+	`/bin/sh $out_dir/batch_mi.cmd`;
     }
 }
 
@@ -400,7 +400,7 @@ sub fine_map_gwas {
 	
 	`$bin_dir/openmp_wrapper -d $out_dir/batch_dap.cmd -t 8`;
     }else{
-	`sh $ou_dir/batch_dap.cmd`;
+	`/bin/sh $out_dir/batch_dap.cmd`;
     }
 
 }
@@ -420,9 +420,9 @@ sub compute_rcp {
     close OUT;
     
     if($use_openmp){
-	`openmp_wrapper -d $out_dir/batch_rcp.cmd -t 8`;
+	`$bin_dir/openmp_wrapper -d $out_dir/batch_rcp.cmd -t 8`;
     }else{
-	`sh $out_dir/batch_rcp.cmd`;
+	`/bin/sh $out_dir/batch_rcp.cmd`;
     }
     
     `cat $out_dir/rcp_out/*.rcp | sort -nrk4  > $out_dir/$trait.enloc.rst`;
