@@ -415,7 +415,7 @@ sub compute_rcp {
     @files = <$out_dir/gwas_pip/*.gwas.pip>;
     foreach $f (@files){
 	$f=~/(\w+)\.gwas.pip/;
-        print OUT "$bin_dir/compute_rcp -a0 $params[0] -a1 $params[1] -loc $1 -gwas_dir $out_dir/gwas_pip -eqtl_dir $out_dir/qtl_pip >$out_dir/rcp_out/$1.rcp  2>$out_dir/rcp_out/$1.enloc.detail\n";
+        print OUT "$bin_dir/compute_rcp -a0 $params[0] -a1 $params[1] -loc $1 -gwas_dir $out_dir/gwas_pip -eqtl_dir $out_dir/qtl_pip -o1 $out_dir/rcp_out/$1.rcp  -o2 $out_dir/rcp_out/$1.enloc.detail\n";
     }
     close OUT;
     

@@ -24,7 +24,22 @@ for $i (0..$#ARGV){
 	$loc = $ARGV[++$i];
 	next;
     }
+   
+    if($ARGV[$i] eq "-o1"){
+        $outfile1 = $ARGV[++$i];
+        next;
+    }
+    
+    if($ARGV[$i] eq "-o2"){
+        $outfile2 = $ARGV[++$i];
+        next;
+    }
+
 }
+
+open OUT1, ">$outfile1";
+open OUT2, ">$outfile2";
+
 
 $ratio = (1+exp($a0+$a1))/(exp($a1)+exp($a0+$a1));
 
@@ -65,7 +80,7 @@ while(<FILE>){
 	$max = $coloc_prob;
 	$max_snp = $snp;
     }
-    printf STDERR "$loc\t$g\t$snp\t%9.4e\n", $coloc_prob;
+    printf OUT2 "$loc\t$g\t$snp\t%9.4e\n", $coloc_prob;
 	
     $cum_coloc_prob += $coloc_prob;
 	
@@ -73,5 +88,8 @@ while(<FILE>){
 
 $loc =~ /(\w+)\_(\w+)/;
 
-printf "%10s   %15s  %9.3f  %9.3f    %20s   %9.3f\n",$2, $1, $cum_gpip,  $cum_coloc_prob,$max_snp, $max;
+
+printf OUT1 "%10s   %15s  %9.3f  %9.3f    %20s   %9.3f\n",$2, $1, $cum_gpip,  $cum_coloc_prob,$max_snp, $max;
+
+
 
