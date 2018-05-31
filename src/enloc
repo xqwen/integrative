@@ -24,6 +24,9 @@ if(!$bypass_enrich){
 
 @params = parse_MI();
 
+
+exit if $bypass_coloc == 1;
+
 # 2. co-localization analysis
 printf STDERR "\n\nStart co-localization analysis\n";
 find_gwas_hits();
@@ -50,6 +53,7 @@ sub init(){
 
 
     $bypass_enrich = 0;
+    $bypass_coloc = 0;
     $impute_num = 25;
 
     $use_openmp = 1;
@@ -69,6 +73,9 @@ sub init(){
 	     $bypass_enrich = $val;
         }  
 
+        if(lc($key) eq "bypass_coloc_analysis"){
+            $bypass_coloc = $val;
+        }
        	
         if(lc($key) eq "impute_set_num"){
              $impute_num = $val;
