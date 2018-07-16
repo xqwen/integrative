@@ -1,0 +1,179 @@
+#! /usr/bin/perl
+use Cwd 'abs_path';
+
+
+# parsing input parameter file
+
+
+# command line option
+
+if($#ARGV<0 || ! -e "$ARGV[0]"){
+    print_usage();
+}
+
+
+# 0. initialization
+init();
+
+ printf STDERR "\nStart enrichment analysis\n";
+ MI_enrichment();
+
+
+
+
+sub print_usage(){
+    print stderr "Usage: enloc_enrich enloc_param_file\n";
+    print stderr "Error: parameter file is not correctly specified\n";
+    exit;
+}
+
+
+sub init(){
+
+    # set key parameters empty
+    $gwas_file = $eqtl_dir = $trait ="";
+    $bin_dir = $out_dir = "./";
+    undef $mi_dir;
+
+    $impute_num = 25;
+
+    while(<>){
+	
+	next if /^\s*\#/;
+	next if $_ !~ /^\s*(\S+)\s+(\S+)\s*/;
+	my $key = $1;
+	my $val = $2;
+
+        ## enrichment analysis
+
+       	
+        if(lc($key) eq "impute_set_num"){
+             $impute_num = $val;
+         }
+
+         if(lc($key) eq "trait"){
+             $trait = $val;
+             next;
+         }
+
+
+         # necessary files/directories
+         #
+         if(lc($key) eq "gwas_data"){
+             $gwas_file = abs_path($val);
+             next;
+         }
+
+
+         if(lc($key) eq "qtl_fm_dir"){
+             $eqtl_dir = abs_path($val);
+             next;
+         }
+
+
+         if(lc($key) eq "bin_dir"){
+             $bin_dir = abs_path($val);
+             next;
+         }
+
+         if(lc($key) eq "out_dir"){
+             $out_dir = abs_path($out_dir);
+             next;
+         }
+
+
+         if(lc($key) eq "mi_dir"){
+             $mi_dir = abs_path($val);
+             next;
+         }
+
+
+     }
+
+     # check necessary parameter: trait name
+     if ($trait eq ""){
+         printf STDERR "Error: trait name is not specified\n";
+         exit;
+     }
+
+     # check necessary input files: eqtl fine-mapping dir and gwas input
+     if( ! -e "$gwas_file" || $gwas_file eq ""){
+         printf stderr "Error: Invalid GWAS file\n";
+         exit;
+     }
+
+     if( ! -d "$eqtl_dir" || $eqtl_dir eq ""){
+         printf stderr "Error: Invalid eQTL fine-mapping directory\n";
+         exit;
+     }
+
+
+     # check all necessary utilitis
+     # 1. mi_eqtl
+     if (! -x "$bin_dir/mi_eqtl"){
+         print stderr "Error: executable $bin_dir/mi_eqtl not found\n";
+         exit;
+     }
+
+     if (! -x "$bin_dir/torus"){
+         print stderr "Error: executable $bin_dir/torus not found\n";
+         exit;
+     }
+
+
+
+     if (defined($mi_dir)){
+         if( ! -d "$mi_dir"){
+             print stderr "Error: specified MI directory not found\n";
+             exit;
+         }
+         $mi_dir = abs_path($mi_dir);
+     }
+
+     if( ! -d "$out_dir"){
+         `mkdir $out_dir`;
+     }
+
+ }
+
+
+
+
+
+
+ sub MI_enrichment{
+
+     if(!defined($mi_dir)){
+         print STDERR "Prepare multiple imputation task ...\n";
+         open OUT, ">$out_dir/prep_mi.cmd";
+         for $i (1..$impute_num){
+             print OUT "$bin_dir/mi_eqtl $eqtl_dir $gwas_file | gzip - > $out_dir/mi/$trait.annot.sim$i.gz\n";
+         }
+         close OUT;
+         `mkdir $out_dir/mi` if (! -d "$out_dir/mi");
+     }
+
+
+     print STDERR "Prepare enrichment analysis task ... \n";
+     `mkdir $out_dir/mi_est` if ! -d "$out_dir/mi_est";
+
+     open OUT, ">$out_dir/mi.cmd";
+
+     if(defined($mi_dir)){
+         @mi_files = <$mi_dir/*.gz>;
+         my $i = 1;
+         foreach $mi_file (@mi_files){
+             print OUT "$bin_dir/torus -d $gwas_file -annot $mi_file  -est --load_zval --single_fuzzy_annot > $out_dir/mi_est/$trait.mi.$i.est\n";
+             $i++;
+         }
+     }else{
+
+         for $i  (1..$impute_num){
+             print OUT "$bin_dir/torus -d $gwas_file -annot $out_dir/mi/$trait.annot.sim$i.gz  -est --load_zval --single_fuzzy_annot > $out_dir/mi_est/$trait.mi.$i.est\n";
+         }
+
+     }
+     close OUT;
+ }
+
+

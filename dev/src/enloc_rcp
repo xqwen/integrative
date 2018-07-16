@@ -1,0 +1,244 @@
+#! /usr/bin/perl
+use Cwd 'abs_path';
+
+
+# parsing input parameter file
+
+
+# command line option
+
+if($#ARGV<0 || ! -e "$ARGV[0]"){
+    print_usage();
+}
+
+
+# 0. initialization
+init();
+
+
+@params = parse_MI();
+
+# 2. co-localization analysis
+printf STDERR "Prepare for co-localization analysis task ...\n";
+
+compute_rcp();
+
+sub print_usage(){
+	print stderr "Usage: enloc_rcp enloc_param_file\n";
+    print stderr "Error: parameter file is not correctly specified\n";
+    exit;
+}
+
+
+sub init(){
+
+    # set key parameters empty
+    $gwas_file  = $trait = $eqtl_pip = $eqtl_summary = "";
+    $bin_dir = $out_dir = "./";
+    undef $mi_dir;
+    undef $eqtl_pip;
+    undef $eqtl_summary;
+
+    # parse parameter file
+    while(<>){
+	
+	next if /^\s*\#/;
+	next if $_ !~ /^\s*(\S+)\s+(\S+)\s*/;
+	my $key = $1;
+	my $val = $2;
+
+    ## enrichment analysis
+
+    if(lc($key) eq "eqtl_pip" || lc($key) eq "eqtl_pip_file"||lc($key) eq "qtl_pip" || lc($key) eq "qtl_pip_file"){
+       	$eqtl_pip = abs_path($val);
+        next;
+    }
+
+	if(lc($key) eq "eqtl_summary" || lc($key) eq "eqtl_summary_file" || lc($key) eq "qtl_summary" || lc($key) eq "qtl_summary_file"){
+        $eqtl_summary = abs_path($val);
+        next;
+    }	
+
+	
+	if(lc($key) eq "trait"){
+         $trait = $val;
+         next;
+     }
+
+
+	if(lc($key) eq "bin_dir"){
+         $bin_dir = abs_path($val);
+         next;
+    }
+	
+	if(lc($key) eq "out_dir"){
+	    $out_dir = abs_path($out_dir);
+	    next;
+	}
+
+
+  
+    if(lc($key) eq "gwas_data"){
+        $gwas_file = abs_path($val);
+        next;
+    }
+
+  }
+
+    if ($trait eq ""){
+		printf STDERR "Error: trait name is not specified\n";
+		exit;
+    }
+
+
+
+
+
+    if( ! -e "$gwas_file" || $gwas_file eq ""){
+		printf stderr "Error: invalid GWAS file\n";
+		exit;
+    }
+
+    if( ! -e "$eqtl_pip" || $eqtl_pip eq ""){
+		printf stderr "Error: invalid eqtl pip file, run \"get_pip qtl_fm_dir\" to obtain a valid one.\n";
+		exit;
+    }
+    
+
+    if( ! -e "$eqtl_summary" || $eqtl_summary eq ""){
+		printf stderr "Error: invalid QTL signal summary file, run \"summarize_sig.pl qtl_fm_dir\" to obtain a valid one\n";
+		exit;
+    }
+    
+
+    # check all necessary utilitis
+    
+
+
+    $bin_dir = abs_path($bin_dir);
+
+
+    if (! -x "$bin_dir/prep_enloc_dap1"){
+        print stderr "Error: executable $bin_dir/prep_enloc_dap1 not found\n";
+        exit;
+    }
+	
+	
+
+    if (! -x "$bin_dir/enloc_dap1"){
+        print stderr "Error: executable $bin_dir/enloc_dap1 not found\n";
+        exit;
+    }
+
+    if (! -x "$bin_dir/prep_rcp"){
+        print stderr "Error: executable $bin_dir/prep_rcp not found\n";
+        exit;
+    }
+	
+    if (! -x "$bin_dir/compute_rcp"){
+        print stderr "Error: executable $bin_dir/compute_rcp not found\n";
+        exit;
+    }
+
+}
+
+
+sub parse_MI {
+
+	open OUT, ">$out_dir/$trait.enrich.est";
+
+	@files = <$out_dir/mi_est/*.est>;
+	if(scalar(@files)==0){
+		print STDERR "Error: results from enrichment analysis is unavailable, please run enloc_enrich first\n";
+		exit;
+	}
+
+	open FILE, "grep Intercept $out_dir/mi_est/*.est |";
+	$sum = 0;
+	$count = 0;
+	$var = 0;
+	while(<FILE>){
+		chomp;
+		my @data = split /\s+/, $_;
+		shift @data until $data[0]=~/^\S/;
+		$sum+= $data[2];
+		push @pti, $data[2];
+		my $sd = abs($data[3]-$data[2])/1.96;
+		push @sei, $sd;
+		$var += $sd*$sd;
+		$count++;
+	}
+
+	my $a0 = $mean = $sum/$count;
+	$sdm = 0;
+	foreach $v (@pti){
+		$sdm += ($v - $mean)*($v-$mean);
+	}
+
+	$bm = $sdm/($count-1);
+	$um = $var/$count;
+
+	$smi = sqrt($um + $bm*($count+1)/$count);
+
+	printf OUT "%9.3f  %9.3f  %9.3f\n", $mean, $mean-1.96*$smi, $mean+1.96*$smi;
+
+	open FILE, "grep annot $out_dir/mi_est/*.est |";
+	$sum = 0;
+	$count = 0;
+	$var = 0;
+	while(<FILE>){
+		chomp;
+		my @data = split /\s+/, $_;
+		shift @data until $data[0]=~/^\S/;
+		$sum+= $data[2];
+		push @pt, $data[2];
+		my $sd = abs($data[3]-$data[2])/1.96;
+		push @se, $sd;
+		$var += $sd*$sd;
+		$count++;
+	}
+
+	my $a1 = $mean = $sum/$count;
+	$sdm = 0;
+	foreach $v (@pt){
+		$sdm += ($v - $mean)*($v-$mean);
+	}
+
+	$bm = $sdm/($count-1);
+	$um = $var/$count;
+
+	$smi = sqrt($um + $bm*($count+1)/$count);
+
+	printf OUT "%9.3f  %9.3f  %9.3f\n", $mean, $mean-1.96*$smi, $mean+1.96*$smi;
+
+
+	return ($a0,$a1);
+
+}
+
+
+sub compute_rcp {
+      ($a0, $a1) = @params;
+      open OUT, ">$out_dir/rcp.cmd";
+      print OUT "$bin_dir/prep_enloc_dap1 -gwas $gwas_file -eqtl $eqtl_pip > $out_dir/$trait.dap1.in; ";
+      print OUT "$bin_dir/enloc_dap1 -d $out_dir/$trait.dap1.in -a0 $a0 -a1 $a1 > $out_dir/$trait.pip; ";
+      print OUT "$bin_dir/prep_rcp -gwas $out_dir/$trait.pip -eqtl $eqtl_summary > $out_dir/$trait.rcp.in; ";
+      print OUT "$bin_dir/compute_rcp -d $out_dir/$trait.rcp.in -a0 $a0 -a1 $a1 | sort -grk5 > $out_dir/$trait.enloc.out\n";
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

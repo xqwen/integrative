@@ -1,4 +1,4 @@
-# ENLOC: Enichment Estimation Aided Colocalization Analysis
+# ENLOC: Enrichment Estimation Aided Colocalization Analysis
 
 
 
@@ -24,7 +24,7 @@ Software distributed under the terms of the GNU General Public License as publis
 
 ## Dependency 
 
-The softwar pipeline assumes the availability of the following executables
+The software pipeline assumes the availability of the following executables
 
 *  [perl](https://www.perl.org/get.html)
 *  [torus](https://github.com/xqwen/dap/tree/master/torus_src)

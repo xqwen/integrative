@@ -1,0 +1,39 @@
+#!/usr/bin/perl 
+
+
+for ($i=0;$i<=$#ARGV;$i++){
+    if($ARGV[$i] eq "-gwas"){
+        $gwas_file = $ARGV[++$i];
+        next;	
+    }
+
+    if($ARGV[$i] eq "-eqtl"){
+        $eqtl_file = $ARGV[++$i];
+        next;	
+    }
+
+
+}
+
+print STDERR "Read in GWAS ...\n";
+open FILE, "$gwas_file";
+while(<FILE>){
+    next if $_ !~ /\d/;
+    my @data = split /\s+/, $_;
+    shift @data until $data[0]=~/^\S/;
+    $gpip{$data[0]} = $data[-1];
+}
+
+
+print STDERR "Processing eQTL data ...\n";
+
+
+
+open FILE, "$eqtl_file";
+while(<FILE>){
+    next if $_ !~ /\d/;
+    my @data = split /\s+/, $_;
+    shift @data until $data[0]=~/^\S/;
+    printf "$data[1]  $data[2] $data[4] $data[5] %7.3e\n",$gpip{$data[4]};
+}
+
