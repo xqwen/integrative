@@ -22,6 +22,7 @@ init();
 printf STDERR "Prepare for co-localization analysis task ...\n";
 
 compute_rcp();
+print STDERR "\nPlease run $out_dir/rcp.cmd\n";
 
 sub print_usage(){
     print stderr "Usage: enloc_rcp enloc_param_file\n";
