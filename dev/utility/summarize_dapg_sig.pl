@@ -1,9 +1,12 @@
 use Cwd 'abs_path';
 
-
+$tissue = "TISSUE";
 $dir = $ARGV[0];
 @files = <$dir/*>;
 $count=0;
+if(defined($ARGV[1])){
+    $tissue = $ARGV[1];
+}
 #
 
 #$count = 0;

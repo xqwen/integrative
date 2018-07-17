@@ -60,24 +60,24 @@ sub init(){
          # necessary files/directories
          #
          if(lc($key) eq "gwas_data"){
-             $gwas_file = abs_path($val);
+             $gwas_file = $val;
              next;
          }
 
 
          if(lc($key) eq "qtl_fm_dir"){
-             $eqtl_dir = abs_path($val);
+             $eqtl_dir = $val;
              next;
          }
 
 
          if(lc($key) eq "bin_dir"){
-             $bin_dir = abs_path($val);
+             $bin_dir = $val;
              next;
          }
 
          if(lc($key) eq "out_dir"){
-             $out_dir = abs_path($out_dir);
+             $out_dir = $val;
              next;
          }
 
@@ -101,11 +101,13 @@ sub init(){
          printf stderr "Error: Invalid GWAS file\n";
          exit;
      }
+     $gwas_file = abs_path($gwas_file);
 
      if( ! -d "$eqtl_dir" || $eqtl_dir eq ""){
          printf stderr "Error: Invalid eQTL fine-mapping directory\n";
          exit;
      }
+     $eqtl_dir = abs_path($eqtl_dir);
 
 
      # check all necessary utilitis
@@ -119,6 +121,7 @@ sub init(){
          print stderr "Error: executable $bin_dir/torus not found\n";
          exit;
      }
+     $bin_dir = abs_path($bin_dir);
 
 
 
@@ -130,9 +133,10 @@ sub init(){
          $mi_dir = abs_path($mi_dir);
      }
 
-     if( ! -d "$out_dir"){
+     if( ! -d "$out_dir" ){
          `mkdir $out_dir`;
      }
+     $out_dir = abs_path($out_dir);
 
  }
 

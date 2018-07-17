@@ -92,7 +92,7 @@ sub init(){
 	}
 
 	if(lc($key) eq "qtl_pip"){	 
-	    $eqtl_pip = $val;
+	    $eqtl_pip = abs_path($val);
 	    next;
 	}
 
@@ -104,19 +104,18 @@ sub init(){
 
 
 	if(lc($key) eq "bin_dir"){
-            $bin_dir = $val;
+            $bin_dir = abs_path($val);
             next;
         }
 	
 	if(lc($key) eq "out_dir"){
-	    $out_dir = $val;
-	    $out_dir = abs_path($out_dir);
+	    $out_dir = abs_path($val);
 	    next;
 	}
 
 
 	if(lc($key) eq "mi_dir"){
-	    $mi_dir = $val;
+	    $mi_dir = abs_path($val);
 	    next;
 	}
 

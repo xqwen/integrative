@@ -76,14 +76,19 @@ KEYWORD   VALUE
 ```
 The keywords are case-insensitive. Comments line are allowed in the parameter file by annotating a ```#``` at the beginning of the comment.
 
-The required parameters include
+The required parameters by ``enloc_enrich`` include:
 
 + **BIN_DIR**: all previously listed analysis utilities (``mi_eqtl``,``torus``, ``enloc_dap1``, ``prep_rcp``, ``compute_rcp``) should be  accessed from a single directory, and BIN_DIR specifies the location of this directory containing all the utilities. Users can make symbolic links to  BIN_DIR instead of copying the executables. Relative path is allowed.
 + **GWAS_DATA**: location of the gzipped GWAS z-score file. Relative path is allowed.
 + **QTL_FM_DIR**: location of the directory containing fine-mapping results of molecular QTL analysis. Relative path is allowed.
 + **OUT_DIR**: output (and working) directory name. enloc will create the directory if it does not already exist. Relative path is allowed.
-+ **TRAIT_NAME**: the name of the GWAS trait
++ **TRAIT**: the name of the GWAS trait
 
+The ***additional*** required parameters by ``enloc_rcp`` include:
+
+
++ **QTL_PIP**: SNP-level pip file from eQTL analysis by DAP-G
++ **QTL_SUMMARY**: signal-level summary from eQTL analysis by DAP-G
 
 
 
