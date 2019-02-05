@@ -1,4 +1,4 @@
-#! /usr/bin/perl
+#!/usr/bin/env perl
 use Cwd 'abs_path';
 
 
@@ -34,7 +34,7 @@ summarize_eqtl_pip();
 compute_prior();
 fine_map_gwas();
 compute_rcp();
-
+print STDERR "Enloc done.\n";
 
 
 sub print_usage(){
@@ -431,7 +431,7 @@ sub compute_rcp {
 	`/bin/sh $out_dir/batch_rcp.cmd`;
     }
     
-    `cat $out_dir/rcp_out/*.rcp | sort -nrk4  > $out_dir/$trait.enloc.rst`;
+    `find $out_dir/rcp_out/ -type f -name "*.rcp" | xargs cat | sort -nrk4  > $out_dir/$trait.enloc.rst`;
     
 }
 

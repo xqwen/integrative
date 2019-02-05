@@ -1,4 +1,4 @@
-#! /usr/bin/perl
+#!/usr/bin/env perl
 
 @files = <$ARGV[0]/*>;
 foreach $f (@files){
