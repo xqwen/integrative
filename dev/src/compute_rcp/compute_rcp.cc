@@ -143,7 +143,7 @@ void compute_rcp(){
 
     double hyp_colocp = cum_gpip/(1+((1-cum_epip)/cum_epip)*( (1+exp(a0+a1))/(exp(a1)+exp(a0+a1)) ));
 
-    printf("%20s  %7.3f %7.3f  %4d   %7.3e %7.3e  %15s %7.3e\n", sig_id.c_str(), cum_epip, cum_gpip, p, cum_colocp, hyp_colocp,  max_snp.c_str(), max_ccp);
+    printf("%20s  %7.3f %7.3f  %4d   %7.3e   %15s %7.3e\n", sig_id.c_str(), cum_epip, cum_gpip, p, cum_colocp,   max_snp.c_str(), max_ccp);
 }
 
 
