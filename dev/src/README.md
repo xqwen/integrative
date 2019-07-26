@@ -136,3 +136,19 @@ The first line indicate the estimate of the intercept term (first column) and it
 
 #### The colocalization analysis output
 
+The results of colocalization analysis are summarized in the file```TRAIT_NAME.enloc.out``. The col
+umns of this file are
+```
+eqtl_locus   cum_eqtl_pip    cum_gwas_pip   num_of_snps   rcp   lead_coloc_SNP  lead_snp_scp
+```
+Specifically,  ``eqtl_locus`` indicates the eQTL locus name;``cum_eqtl_pip`` and ``cum_gwas_pip``represent the cumulative posterior inclusion probabilities (PIPs) of the locus containing a causal eQTL and a causal GWAS hit, respectively; ``num_of_snps`` indicates number of member SNPs (in LD) within the locus;``rcp`` reprsents the regional colocalization probability of the locus The entry ```lead_coloc_SNP``` provides the lead SNP with highest SNP-level colocalization probability whose exact value is shown in the entry ```lead_snp_scp```.
+
+An example output is shown below
+```
+ENSG00000163704.11:1    0.987   1.000     1   9.996e-01  chr3_9933702_C_G_b38 9.996e-01
+ ENSG00000230082.1:1    0.900   1.000     1   9.971e-01  chr3_9933702_C_G_b38 9.971e-01
+ENSG00000117122.13:1    0.994   1.000     9   9.530e-01  chr1_16980180_C_G_b38 9.530e-01
+ENSG00000089101.17:1    0.998   0.994     3   9.447e-01  chr20_20087991_C_G_b38 9.068e-01
+```
+The entries are sorted according to the descending order of their rcp values.
+
