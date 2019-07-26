@@ -1,4 +1,4 @@
-#! /usr/bin/perl
+#!/usr/bin/env perl
 
 for $i (0..$#ARGV){
     if($ARGV[$i] eq "-a0"){
