@@ -5,13 +5,13 @@ using namespace std;
 #include <stdlib.h>
 #include <stdio.h>
 
-#dfine LENGTH 2560
+#define LENGTH 2560
 int main(int argc, char **argv){
   
 
   char data_file[LENGTH];
   //char ld_file[128];
-  char prior_file[LENGTH;  
+  char prior_file[LENGTH];  
   char subset_file[LENGTH];
   
   //memset(grid_file,0,128);
