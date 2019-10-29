@@ -1,6 +1,9 @@
 # ENLOC: Enrichment Estimation Aided Colocalization Analysis
 
 
+***We have now released a new version of ENLOC:*** [fastENLOC](https://github.com/xqwen/fastenloc). ***It is runs faster and much easier to use. We recommend the users to use fastENLOC, but we will continue supporting the old version (Oct/29/2019)***
+
+
 
 This repository contains the software implementation of *enloc*, which enables integrative genetic association analysis of molecular QTL data and GWAS data. The statistical model and the key computational procedures are described in this [manuscript](http://biorxiv.org/content/early/2016/10/02/078667).
 
